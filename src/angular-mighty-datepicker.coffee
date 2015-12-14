@@ -65,6 +65,7 @@ angular.module("mightyDatepicker").directive "mightyDatepicker", ($compile) ->
     rangeFrom: '='
     rangeTo: '='
 
+
   link: ($scope, $element, $attrs) ->
     _bake = ->
       domEl = $compile(angular.element($scope.options.template))($scope)
@@ -129,8 +130,8 @@ angular.module("mightyDatepicker").directive "mightyDatepicker", ($compile) ->
       calendarEnd = moment(time).endOf('month')
       weeksInMonth = calendarEnd.week() - calendarStart.week()
       if weeksInMonth < 0 # year edge
+        calendarStart.subtract 1, 'day'
         weeksInMonth =
-          calendarStart.subtract 1, 'day'
           (calendarStart.weeksInYear()-calendarStart.week())+calendarEnd.week()
       start = time.startOf('month')
       weeks =(
