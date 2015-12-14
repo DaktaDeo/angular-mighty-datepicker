@@ -242,15 +242,17 @@
             break;
           case "simple":
             $scope.$watch('model', function(newVal, oldVal) {
-              if (!moment.isMoment(newVal)) {
-                newVal = moment(newVal);
-              }
-              if (!oldVal || oldVal && !newVal.isSame(oldVal, 'day')) {
-                $scope.model = newVal;
-                if (oldVal) {
-                  $scope.options.start = moment(newVal);
+              if (newVal != null) {
+                if (!moment.isMoment(newVal)) {
+                  newVal = moment(newVal);
                 }
-                return _prepare();
+                if (!oldVal || oldVal && !newVal.isSame(oldVal, 'day')) {
+                  $scope.model = newVal;
+                  if (oldVal) {
+                    $scope.options.start = moment(newVal);
+                  }
+                  return _prepare();
+                }
               }
             });
         }

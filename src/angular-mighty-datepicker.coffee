@@ -220,12 +220,13 @@ angular.module("mightyDatepicker").directive "mightyDatepicker", ($compile) ->
 
       when "simple"
         $scope.$watch 'model', (newVal, oldVal) ->
-          newVal = moment(newVal) unless moment.isMoment(newVal)
-          if !oldVal || oldVal && !newVal.isSame(oldVal, 'day')
-            $scope.model = newVal
-            if oldVal
-              $scope.options.start = moment(newVal)
-            _prepare()
+          if newVal?
+            newVal = moment(newVal) unless moment.isMoment(newVal)
+            if !oldVal || oldVal && !newVal.isSame(oldVal, 'day')
+              $scope.model = newVal
+              if oldVal
+                $scope.options.start = moment(newVal)
+              _prepare()
 
     $scope.$watch 'before', (newVal, oldVal) ->
       if newVal
