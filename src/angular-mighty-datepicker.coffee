@@ -73,7 +73,7 @@ angular.module("mightyDatepicker").directive "mightyDatepicker", ($compile) ->
 
 
     _indexOfMoment = (array, element, match) ->
-  
+
       for value,key in array
         return key if element.isSame(value,match)
 
