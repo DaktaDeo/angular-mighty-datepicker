@@ -35,8 +35,8 @@
           return $element.append(domEl);
         };
         _indexOfMoment = function(array, element, match) {
-          var key, value;
-          for (key in array) {
+          var i, key, len, value;
+          for (key = i = 0, len = array.length; i < len; key = ++i) {
             value = array[key];
             if (element.isSame(value, match)) {
               return key;

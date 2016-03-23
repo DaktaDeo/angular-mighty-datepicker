@@ -71,9 +71,12 @@ angular.module("mightyDatepicker").directive "mightyDatepicker", ($compile) ->
       domEl = $compile(angular.element($scope.options.template))($scope)
       $element.append(domEl)
 
+
     _indexOfMoment = (array, element, match) ->
-      for key, value of array
-        return key if element.isSame(value, match)
+  
+      for value,key in array
+        return key if element.isSame(value,match)
+
       -1
 
     _indexMarkers = ->
