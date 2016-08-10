@@ -16,6 +16,7 @@
     };
     return {
       restrict: "AE",
+      require: 'ngModel',
       replace: true,
       template: '<div class="mighty-picker__holder"></div>',
       scope: {
@@ -27,7 +28,7 @@
         rangeFrom: '=',
         rangeTo: '='
       },
-      link: function($scope, $element, $attrs) {
+      link: function($scope, $element, $attrs, $ngModelCtrl) {
         var _bake, _build, _buildMonth, _buildWeek, _getMarker, _indexMarkers, _indexOfMoment, _isInRange, _isSelected, _prepare, _setup, _withinLimits;
         _bake = function() {
           var domEl;
@@ -171,6 +172,7 @@
                 }
               } else {
                 $scope.model = [];
+                $ngModelCtrl.$setViewValue([]);
               }
               break;
             default:
@@ -221,6 +223,7 @@
                 break;
               default:
                 $scope.model = day.date;
+                $ngModelCtrl.$setViewValue(day.date);
             }
             if ($scope.options.callback) {
               $scope.options.callback(day.date);
@@ -248,6 +251,7 @@
                 }
                 if (!oldVal || oldVal && !newVal.isSame(oldVal, 'day')) {
                   $scope.model = newVal;
+                  $ngModelCtrl.$setViewValue(newVal);
                   if (oldVal) {
                     $scope.options.start = moment(newVal);
                   }

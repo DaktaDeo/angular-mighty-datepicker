@@ -54,6 +54,7 @@ angular.module("mightyDatepicker").directive "mightyDatepicker", ($compile) ->
     markerTemplate: "{{ day.marker }}"
     template: pickerTemplate
   restrict: "AE"
+  require: 'ngModel',
   replace: true
   template: '<div class="mighty-picker__holder"></div>'
   scope:
@@ -64,44 +65,44 @@ angular.module("mightyDatepicker").directive "mightyDatepicker", ($compile) ->
     before: '='
     rangeFrom: '='
     rangeTo: '='
-
-
-  link: ($scope, $element, $attrs) ->
+  
+  
+  link: ($scope, $element, $attrs,$ngModelCtrl) ->
     _bake = ->
       domEl = $compile(angular.element($scope.options.template))($scope)
       $element.append(domEl)
-
-
+    
+    
     _indexOfMoment = (array, element, match) ->
-
+      
       for value,key in array
         return key if element.isSame(value,match)
-
+      
       -1
-
+    
     _indexMarkers = ->
       $scope.markerIndex = (marker.day for marker in $scope.markers) if $scope.markers
-
+    
     _withinLimits = (day, month) ->
       withinLimits = true
       withinLimits &&= day.isBefore($scope.before) if $scope.before
       withinLimits &&= day.isAfter($scope.after) if $scope.after
       withinLimits
-
+    
     _getMarker = (day) ->
       ix = _indexOfMoment($scope.markerIndex, day, 'day')
       if ix > -1
         return $scope.markers[ix].marker
       else
         return undefined
-
+    
     _isSelected = (day) ->
       switch $scope.options.mode
         when "multiple"
           return _indexOfMoment($scope.model, day, 'day') > -1
         else
           return $scope.model && day.isSame($scope.model, 'day')
-
+    
     _isInRange = (day) ->
       if $scope.options.rangeMode
         if $scope.options.rangeMode == "from"
@@ -110,7 +111,7 @@ angular.module("mightyDatepicker").directive "mightyDatepicker", ($compile) ->
           return moment.range($scope.after, $scope.model).contains(day) || day.isSame($scope.after, 'day')
       else
         return false
-
+    
     _buildWeek = (time, month) ->
       days = []
       filter = true
@@ -126,7 +127,7 @@ angular.module("mightyDatepicker").directive "mightyDatepicker", ($compile) ->
         disabled: !(withinLimits && withinMonth && filter)
         marker: _getMarker(day) if withinMonth
       days
-
+    
     _buildMonth = (time) ->
       weeks = []
       calendarStart = moment(time).startOf('month')
@@ -142,21 +143,21 @@ angular.module("mightyDatepicker").directive "mightyDatepicker", ($compile) ->
         ) for w in [0 .. weeksInMonth])
       weeks: weeks
       name: time.format("MMMM YYYY")
-
+    
     _setup = ->
       tempOptions = {}
       for attr, v of options
         tempOptions[attr] = v
-
+      
       if $scope.options
         for attr,v of $scope.options
           tempOptions[attr] = $scope.options[attr]
-
+      
       $scope.options = tempOptions
-
+      
       switch $scope.options.mode
         when "multiple"
-          # add start based on model
+# add start based on model
           if $scope.model && Array.isArray($scope.model) && $scope.model.length>0
             if $scope.model.length == 1
               start = moment($scope.model[0])
@@ -165,36 +166,37 @@ angular.module("mightyDatepicker").directive "mightyDatepicker", ($compile) ->
               start = moment(dates.sort().slice(-1)[0])
           else
             $scope.model = []
+            $ngModelCtrl.$setViewValue([])
         else
           start = moment($scope.model) if $scope.model
-
+      
       $scope.options.start =
         $scope.options.start || start || moment().startOf('day')
-
+      
       if $scope.rangeFrom
         $scope.options.rangeMode = "from"
       else if $scope.rangeTo
         $scope.options.rangeMode = "to"
-
+      
       _indexMarkers()
       $scope.options.template = $scope.options.template.replace('ng-bind-template=""',
         'ng-bind-template="' + $scope.options.markerTemplate + '"')
-
+    
     _prepare = ->
       $scope.months = []
       $scope.months = (
         _buildMonth(moment($scope.options.start).add(m,'months')
         ) for m in [0 ... $scope.options.months])
-
+    
     _build = ->
       _prepare()
       _bake()
-
+    
     $scope.moveMonth = (step) ->
       $scope.options.start.add(step,'month')
       _prepare()
       return
-
+    
     $scope.select = (day) ->
       if !day.disabled
         switch $scope.options.mode
@@ -206,37 +208,39 @@ angular.module("mightyDatepicker").directive "mightyDatepicker", ($compile) ->
               $scope.model.push(moment(day.date))
           else
             $scope.model = day.date
+            $ngModelCtrl.$setViewValue(day.date)
         $scope.options.callback day.date if $scope.options.callback
         _prepare()
-
+    
     $scope.$watchCollection 'markers', (newMarkers, oldMarkers) ->
       _indexMarkers()
       _prepare()
-
+    
     _setup()
     _build()
-
+    
     switch $scope.options.mode
       when "multiple"
         $scope.$watchCollection 'model', (newVals, oldVals) ->
           _prepare()
-
+      
       when "simple"
         $scope.$watch 'model', (newVal, oldVal) ->
           if newVal?
             newVal = moment(newVal) unless moment.isMoment(newVal)
             if !oldVal || oldVal && !newVal.isSame(oldVal, 'day')
               $scope.model = newVal
+              $ngModelCtrl.$setViewValue(newVal)
               if oldVal
                 $scope.options.start = moment(newVal)
               _prepare()
-
+    
     $scope.$watch 'before', (newVal, oldVal) ->
       if newVal
         newVal = moment(newVal) unless moment.isMoment(newVal)
         unless newVal.isSame(oldVal, 'day')
           _prepare()
-
+    
     $scope.$watch 'after', (newVal, oldVal) ->
       if newVal
         newVal = moment(newVal) unless moment.isMoment(newVal)
